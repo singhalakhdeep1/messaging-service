@@ -1,65 +1,47 @@
 # Real-time Messaging Service
 
-![Node.js](https://img.shields.io/badge/Node.js-18.x-green)
-![Express](https://img.shields.io/badge/Express-4.18-white)
-![Socket.io](https://img.shields.io/badge/Socket.io-4.7-black)
-![Redis](https://img.shields.io/badge/Redis-7.x-red)
-![License](https://img.shields.io/badge/License-MIT-blue)
+A real-time messaging service with WebSocket support, Redis pub/sub for scalability, typing indicators, read receipts, and messaging features.
 
-A production-ready real-time messaging service with WebSocket support, Redis pub/sub for scalability, typing indicators, read receipts, and enterprise-grade features.
+## Overview
 
-## 📋 Overview
+This service handles instant messaging, group chats, and real-time notifications. Built with Node.js, Express, Socket.io, and Redis, implementing WebSocket connections with horizontal scaling through Redis pub/sub.
 
-The Real-time Messaging Service is a comprehensive chat solution designed to handle instant messaging, group chats, and real-time notifications. Built with Node.js, Express, Socket.io, and Redis, this service implements WebSocket connections with horizontal scaling capabilities through Redis pub/sub.
+## Features
 
-## ✨ Features
+- Real-time messaging via WebSocket
+- Private and group chats
+- Read receipts and delivery confirmations
+- Typing indicators
+- Online presence tracking
+- Message history with pagination
+- File sharing in conversations
+- Message reactions and editing
+- Message deletion
+- Full-text search
+- User mentions
+- Redis pub/sub for horizontal scaling
+- Socket.io rooms for broadcasting
+- Automatic reconnection
+- Message queuing
+- JWT authentication
+- Optional end-to-end encryption
+- Rate limiting
+- Content moderation
 
-### Core Messaging
-- **Real-time Messaging**: Instant message delivery via WebSocket
-- **Private & Group Chats**: Support for one-on-one and group conversations
-- **Message Status**: Read receipts and delivery confirmations
-- **Typing Indicators**: Real-time typing status updates
-- **Online Presence**: User online/offline status tracking
-- **Message History**: Persistent message storage with pagination
+## Tech Stack
 
-### Advanced Features
-- **File Sharing**: Upload and share files in conversations
-- **Message Reactions**: Emoji reactions to messages
-- **Message Editing**: Edit sent messages within time window
-- **Message Deletion**: Delete messages for sender or all participants
-- **Search**: Full-text search across conversations
-- **Mentions**: @mention users in group chats
+- Node.js 18.x
+- Express.js 4.18.x
+- Socket.io 4.7.x
+- Redis 7.x
+- MongoDB 6.0+
+- Mongoose 8.0.x
+- JWT 9.0.x
+- Multer 1.4.x
+- Sharp 0.32.x
+- Winston 3.10.x
 
-### Scalability & Performance
-- **Redis Pub/Sub**: Horizontal scaling across multiple server instances
-- **Socket.io Rooms**: Efficient room-based message broadcasting
-- **Connection Management**: Automatic reconnection with exponential backoff
-- **Message Queuing**: Reliable message delivery during disconnections
-- **Load Balancing**: Sticky session support for WebSocket connections
-
-### Security & Privacy
-- **Authentication**: JWT-based authentication for WebSocket connections
-- **End-to-End Encryption**: Optional client-side encryption support
-- **Message Privacy**: User-scoped message access control
-- **Rate Limiting**: Message rate limits to prevent spam
-- **Content Moderation**: Profanity filter and content moderation
-
-## 🛠️ Tech Stack
-
-| Technology | Version | Purpose |
-|------------|---------|---------|
-| Node.js | 18.x | Runtime environment |
-| Express.js | 4.18.x | Web framework |
-| Socket.io | 4.7.x | WebSocket implementation |
-| Redis | 7.x | Pub/sub adapter for scaling |
-| MongoDB | 6.0+ | Message storage |
-| Mongoose | 8.0.x | ODM |
-| JWT | 9.0.x | Authentication |
-| Multer | 1.4.x | File upload handling |
-| Sharp | 0.32.x | Image processing |
-| Winston | 3.10.x | Logging |
-
-## 📁 Project Structure
+## Project Structure
 
 ```
 messaging-service/
@@ -98,7 +80,7 @@ messaging-service/
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 
@@ -148,7 +130,7 @@ The API will be available at `http://localhost:5000`
 
 ---
 
-## 📡 API Endpoints
+## API Endpoints
 
 ### Authentication
 
@@ -229,7 +211,7 @@ The API will be available at `http://localhost:5000`
 
 ---
 
-## 🔐 Security Features
+## Security Features
 
 ### Authentication
 - **JWT Verification**: All WebSocket connections authenticated with JWT
@@ -249,7 +231,7 @@ The API will be available at `http://localhost:5000`
 
 ---
 
-## 📊 Database Schema
+## Database Schema
 
 ### Chat Model
 ```javascript
@@ -316,7 +298,7 @@ The API will be available at `http://localhost:5000`
 
 ---
 
-## 🧪 Testing
+## Testing
 
 The project includes comprehensive test suites:
 
@@ -333,7 +315,7 @@ npm test -- --coverage
 
 ---
 
-## 📈 Monitoring & Logging
+## Monitoring & Logging
 
 ### Winston Logger Configuration
 - **Console**: Colored output for development
@@ -351,7 +333,7 @@ npm test -- --coverage
 
 ---
 
-## 🚀 Deployment
+## Deployment
 
 ### Environment Variables for Production
 
@@ -385,7 +367,7 @@ ENABLE_CONTENT_MODERATION=true
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
 Contributions are welcome! Please follow these steps:
 
@@ -397,13 +379,13 @@ Contributions are welcome! Please follow these steps:
 
 ---
 
-## 📝 License
+## License
 
 Proprietary - All rights reserved.
 
 ---
 
-## 👨‍💻 Author
+## Author
 
 **Alakhdeep Singh**
 
