@@ -53,6 +53,14 @@ exports.initializeSocket = (server) => {
             socket.userId = decoded.id;
             socket.userEmail = decoded.email;
 
+            // Origin validation
+            const origin = socket.handshake.headers.origin;
+            const allowedOrigins = [process.env.CLIENT_URL || 'http://localhost:3000'];
+            
+            if (!allowedOrigins.includes(origin)) {
+                return next(new Error('Origin not allowed'));
+            }
+
             next();
         } catch (error) {
             next(new Error('Authentication error'));
@@ -107,8 +115,29 @@ exports.initializeSocket = (server) => {
                     updatedAt: new Date()
                 });
 
+                // Get chat participants
+                const chat = await Chat.findById(chatId).populate('participants');
+                
+                // Add delivery confirmations for online users (excluding sender)
+                const onlineParticipants = chat.participants.filter(
+                    p => p._id.toString() !== socket.userId && onlineUsers.has(p._id.toString())
+                );
+                
+                if (onlineParticipants.length > 0) {
+                    message.deliveredTo = onlineParticipants.map(p => p._id);
+                    await message.save();
+                }
+
                 // Emit message to chat room
                 io.to(chatId).emit('message:received', message);
+
+                // Emit delivery confirmations
+                if (message.deliveredTo && message.deliveredTo.length > 0) {
+                    io.to(chatId).emit('message:delivered', {
+                        messageId: message._id,
+                        deliveredTo: message.deliveredTo
+                    });
+                }
 
                 // Stop typing indicator
                 io.to(chatId).emit('typing:stop', { userId: socket.userId, chatId });

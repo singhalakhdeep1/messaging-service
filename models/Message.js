@@ -25,6 +25,16 @@ const messageSchema = new mongoose.Schema({
     fileName: String,
     fileSize: Number,
     readBy: [{
+        user: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User'
+        },
+        readAt: {
+            type: Date,
+            default: Date.now
+        }
+    }],
+    deliveredTo: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
     }],
@@ -32,13 +42,36 @@ const messageSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Message'
     },
+    reactions: [{
+        user: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User'
+        },
+        emoji: {
+            type: String
+        },
+        createdAt: {
+            type: Date,
+            default: Date.now
+        }
+    }],
     edited: {
         type: Boolean,
         default: false
     },
+    editedAt: {
+        type: Date
+    },
     deleted: {
         type: Boolean,
         default: false
+    },
+    deletedFor: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+    }],
+    deletedAt: {
+        type: Date
     }
 }, {
     timestamps: true
@@ -99,5 +132,6 @@ messageSchema.post('save', function (doc) {
 // Indexes
 messageSchema.index({ chat: 1, createdAt: -1 });
 messageSchema.index({ sender: 1 });
+messageSchema.index({ content: 'text' }); // For full-text search
 
 module.exports = mongoose.model('Message', messageSchema);
