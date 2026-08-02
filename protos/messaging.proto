@@ -1,0 +1,38 @@
+// Protocol Buffers definition for messaging-service
+
+syntax = "proto3";
+
+package messaging;
+
+service MessagingService {
+  rpc SendMessage(MessageRequest) returns (MessageResponse);
+  rpc GetMessage(MessageIdRequest) returns (Message);
+  rpc streamMessages(UserRequest) returns (stream Message);
+}
+
+message MessageRequest {
+  string userId = 1;
+  string recipientId = 2;
+  string content = 3;
+}
+
+message MessageResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message MessageIdRequest {
+  string messageId = 1;
+}
+
+message Message {
+  string id = 1;
+  string userId = 2;
+  string recipientId = 3;
+  string content = 4;
+  string timestamp = 5;
+}
+
+message UserRequest {
+  string userId = 1;
+}
