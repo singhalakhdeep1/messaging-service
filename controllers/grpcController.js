@@ -1,4 +1,9 @@
 // gRPC controller for messaging-service
+//
+// Architecture: gRPC handlers delegate persistence to a MessageRepository.
+// In production the repository uses a real database (Mongo/Postgres).
+// In development/test without a DB, set MESSAGE_STORE=memory to use the
+// in-process InMemoryMessageStore — clearly labelled, not silently injected.
 
 const grpc = require('@grpc/grpc-js');
 const protoLoader = require('@grpc/proto-loader');
@@ -14,8 +19,72 @@ const packageDefinition = protoLoader.loadSync(PROTO_PATH, {
 });
 const messagingProto = grpc.loadPackageDefinition(packageDefinition).messaging;
 
-class GrpcController {
+// ── In-memory store (dev/test only) ─────────────────────────────────────────
+
+class InMemoryMessageStore {
   constructor() {
+    /** @type {Map<string, object>} */
+    this.messages = new Map();
+  }
+
+  async save(message) {
+    this.messages.set(message.id, message);
+    return message;
+  }
+
+  async findById(messageId) {
+    return this.messages.get(messageId) ?? null;
+  }
+
+  async findByUserId(userId) {
+    return [...this.messages.values()].filter(m => m.userId === userId || m.recipientId === userId);
+  }
+}
+
+// ── Database store (production) ──────────────────────────────────────────────
+// Replace with your real ORM/driver. Example uses a hypothetical messageModel.
+
+class DatabaseMessageStore {
+  constructor(messageModel) {
+    this.messageModel = messageModel;
+  }
+
+  async save(message) {
+    return this.messageModel.create(message);
+  }
+
+  async findById(messageId) {
+    return this.messageModel.findById(messageId);
+  }
+
+  async findByUserId(userId) {
+    return this.messageModel.find({ $or: [{ userId }, { recipientId: userId }] });
+  }
+}
+
+// ── Factory ──────────────────────────────────────────────────────────────────
+
+function createMessageStore(messageModel) {
+  if (process.env.MESSAGE_STORE === 'memory' || !messageModel) {
+    if (!messageModel) {
+      console.warn(
+        '[messaging-service] No messageModel provided — falling back to InMemoryMessageStore. ' +
+        'Set MESSAGE_STORE=memory explicitly to silence this warning in dev.'
+      );
+    }
+    return new InMemoryMessageStore();
+  }
+  return new DatabaseMessageStore(messageModel);
+}
+
+// ── gRPC controller ──────────────────────────────────────────────────────────
+
+class GrpcController {
+  /**
+   * @param {object|null} messageModel  Mongoose/Sequelize model (optional in dev)
+   */
+  constructor(messageModel = null) {
+    this.store = createMessageStore(messageModel);
     this.server = new grpc.Server();
     this._setupServices();
   }
@@ -31,8 +100,7 @@ class GrpcController {
   async sendMessage(call, callback) {
     try {
       const { userId, recipientId, content } = call.request;
-      
-      // Mock message storage
+
       const message = {
         id: Date.now().toString(),
         userId,
@@ -40,6 +108,8 @@ class GrpcController {
         content,
         timestamp: new Date().toISOString()
       };
+
+      await this.store.save(message);
 
       callback(null, {
         success: true,
@@ -56,37 +126,38 @@ class GrpcController {
   async getMessage(call, callback) {
     try {
       const { messageId } = call.request;
-      
-      // Mock message retrieval
-      const message = {
-        id: messageId,
-        userId: 'user-1',
-        recipientId: 'user-2',
-        content: 'Hello world',
-        timestamp: new Date().toISOString()
-      };
+
+      const message = await this.store.findById(messageId);
+
+      if (!message) {
+        return callback({
+          code: grpc.status.NOT_FOUND,
+          details: `Message ${messageId} not found`
+        });
+      }
 
       callback(null, message);
     } catch (error) {
       callback({
-        code: grpc.status.NOT_FOUND,
+        code: grpc.status.INTERNAL,
         details: error.message
       });
     }
   }
 
-  async *streamMessages(call) {
+  async streamMessages(call) {
     const { userId } = call.request;
-    
-    // Mock streaming messages
-    for (let i = 0; i < 10; i++) {
-      yield {
-        id: (Date.now() + i).toString(),
-        userId,
-        content: `Message ${i}`,
-        timestamp: new Date().toISOString()
-      };
-      await new Promise(resolve => setTimeout(resolve, 1000));
+
+    try {
+      const messages = await this.store.findByUserId(userId);
+
+      for (const message of messages) {
+        call.write(message);
+      }
+    } catch (error) {
+      call.destroy(error);
+    } finally {
+      call.end();
     }
   }
 
@@ -112,3 +183,5 @@ class GrpcController {
 }
 
 module.exports = GrpcController;
+module.exports.InMemoryMessageStore = InMemoryMessageStore;
+module.exports.DatabaseMessageStore = DatabaseMessageStore;
