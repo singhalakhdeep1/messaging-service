@@ -271,7 +271,7 @@ export default function ChatApp() {
 
     const fetchMessages = async (chatId, pageNum = 1) => {
         try {
-            const res = await fetch(`${API_URL}/messages/chat/${chatId}?page=${pageNum}&limit=50`, {
+            const res = await fetch(`${API_URL}/messages/${chatId}?page=${pageNum}&limit=50`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
             const data = await res.json();

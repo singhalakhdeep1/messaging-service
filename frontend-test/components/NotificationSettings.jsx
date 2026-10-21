@@ -17,7 +17,7 @@ export default function NotificationSettings({ token, API_URL, user }) {
 
     const fetchPreferences = async () => {
         try {
-            const res = await fetch(`${API_URL}/notifications/preferences`, {
+            const res = await fetch(`${API_URL}/notifications/settings`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
             const data = await res.json();
@@ -32,7 +32,7 @@ export default function NotificationSettings({ token, API_URL, user }) {
     const updatePreferences = async () => {
         setLoading(true);
         try {
-            const res = await fetch(`${API_URL}/notifications/preferences`, {
+            const res = await fetch(`${API_URL}/notifications/settings`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',

@@ -45,7 +45,7 @@ export default function IntegrationSettings({ token, API_URL }) {
     const testIntegration = async (type) => {
         setLoading(true);
         try {
-            const res = await fetch(`${API_URL}/integrations/test/${type}`, {
+            const res = await fetch(`${API_URL}/integrations/status`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
