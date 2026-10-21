@@ -1,6 +1,5 @@
 const express = require('express');
 const router = express.Router();
-const axios = require('axios');
 const auth = require('../middleware/auth');
 
 /**
@@ -77,10 +76,13 @@ router.post('/slack', auth, async (req, res) => {
       return res.status(400).json({ success: false, error: 'Slack webhook URL not configured' });
     }
 
-    await axios.post(slackWebhookUrl, {
-      text: message,
-      channel: channel || '#general'
+    const response = await fetch(slackWebhookUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text: message, channel: channel || '#general' }),
     });
+
+    if (!response.ok) throw new Error(`Slack request failed: ${response.status}`);
 
     res.status(200).json({ success: true, message: 'Message sent to Slack' });
   } catch (error) {
@@ -119,9 +121,13 @@ router.post('/discord', auth, async (req, res) => {
       return res.status(400).json({ success: false, error: 'Discord webhook URL required' });
     }
 
-    await axios.post(webhookUrl, {
-      content: message
+    const response = await fetch(webhookUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ content: message }),
     });
+
+    if (!response.ok) throw new Error(`Discord request failed: ${response.status}`);
 
     res.status(200).json({ success: true, message: 'Message sent to Discord' });
   } catch (error) {
@@ -161,13 +167,16 @@ router.post('/telegram', auth, async (req, res) => {
       return res.status(400).json({ success: false, error: 'Telegram bot token not configured' });
     }
 
-    await axios.post(
+    const response = await fetch(
       `https://api.telegram.org/bot${telegramBotToken}/sendMessage`,
       {
-        chat_id: chatId,
-        text: message
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ chat_id: chatId, text: message }),
       }
     );
+
+    if (!response.ok) throw new Error(`Telegram request failed: ${response.status}`);
 
     res.status(200).json({ success: true, message: 'Message sent to Telegram' });
   } catch (error) {
